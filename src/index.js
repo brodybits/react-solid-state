@@ -1,6 +1,6 @@
 import { State, Sync } from 'solid-js'
 import { Component } from 'react'
-RENDER_SYNC = Symbol('render sync');
+const RENDER_SYNC = Symbol('render sync');
 
 function isStatelessComponent(Comp) {
   return !(Comp.prototype && Comp.prototype.render) && !Component.isPrototypeOf(Comp);
@@ -25,7 +25,6 @@ function toStatefulComponent(StatelessComponent) {
 };
 
 export default function(ReactComponent) {
-  var ReactSolidState;
   if (isStatelessComponent(ReactComponent)) {
     ReactComponent = toStatefulComponent(ReactComponent);
   }
