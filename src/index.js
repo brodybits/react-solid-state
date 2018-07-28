@@ -1,4 +1,4 @@
-import { State, Sync } from 'solid-js'
+import { S, State } from 'solid-js'
 import { Component } from 'react'
 const RENDER_SYNC = Symbol('render sync');
 
@@ -32,7 +32,10 @@ export default function(ReactComponent) {
   class ReactSolidState extends ReactComponent {
     constructor(props) {
       super(props);
-      this.state = new State(this.state || {});
+      S.root(disposer => {
+        this.state = new State(this.state || {})
+        this.state.dispose = disposer
+      })
     }
 
     render() {
@@ -41,14 +44,17 @@ export default function(ReactComponent) {
         return super.render();
       }
       result = null;
-      this[RENDER_SYNC] = new Sync(() => {
-        // first render
-        if (!this[RENDER_SYNC]) {
-          result = super.render();
-          return;
-        }
-        return super.forceUpdate();
-      });
+      S.root(disposer => {
+        this[RENDER_SYNC] = S.makeComputationNode(() => {
+          // first render
+          if (!this[RENDER_SYNC]) {
+            result = super.render();
+            return;
+          }
+          return super.forceUpdate();
+        });
+        this[RENDER_SYNC].dispose = disposer;
+      })
       return result;
     }
 

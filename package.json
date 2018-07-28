@@ -1,7 +1,7 @@
 {
   "name": "react-solid-state",
   "description": "A webcomponent wrapper for React Components",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Ryan Carniato",
   "license": "MIT",
   "repository": {
@@ -14,15 +14,15 @@
     "prepublishOnly": "rollup -c"
   },
   "peerDependencies": {
-    "solid-js": "0.0.x",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2"
+    "solid-js": "~0.0.10",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1"
   },
   "devDependencies": {
     "rollup": "^0.59.2",
     "rollup-plugin-node-resolve": "^3.3.0",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2",
-    "solid-js": "0.0.x"
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "solid-js": "~0.0.10"
   }
 }
