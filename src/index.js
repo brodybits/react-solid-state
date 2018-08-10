@@ -1,5 +1,6 @@
-import { S, State } from 'solid-js'
-import { Component } from 'react'
+import { S } from 's-js';
+import { State } from 'solid-js';
+import { Component } from 'react';
 const RENDER_SYNC = Symbol('render sync');
 
 function isStatelessComponent(Comp) {
@@ -8,9 +9,9 @@ function isStatelessComponent(Comp) {
 
 function toStatefulComponent(StatelessComponent) {
   class StatefulComponent extends Component {
-      render() {
-        return StatelessComponent.call(this, this.props, this.context);
-      }
+    render() {
+      return StatelessComponent.call(this, this.props, this.context);
+    }
   };
 
   StatefulComponent.displayName = StatelessComponent.displayName || StatelessComponent.name;
