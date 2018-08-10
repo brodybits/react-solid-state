@@ -7,7 +7,7 @@ export default {
     format: 'cjs',
     exports: 'named'
   },
-  external: ['react', 'react-dom', 'solid-js'],
+  external: ['react', 'react-dom', 'solid-js', 's-js'],
   plugins: [
     nodeResolve({ extensions: ['.js'] })
   ]

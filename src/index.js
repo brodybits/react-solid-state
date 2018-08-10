@@ -1,4 +1,4 @@
-import { S } from 's-js';
+import S from 's-js';
 import { State } from 'solid-js';
 import { Component } from 'react';
 const RENDER_SYNC = Symbol('render sync');
