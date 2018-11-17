@@ -2,7 +2,7 @@
 
 This is a local state swap for React using [Solid.js](https://github.com/ryansolid/solid). Instead of worry about when your components should update you can use declarative data.
 
-```js
+```jsx
 import withSolid from 'react-solid-state'
 import React, { Component }  from 'react'
 
