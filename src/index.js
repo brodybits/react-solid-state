@@ -1,5 +1,4 @@
-import S from 's-js';
-import { State } from 'solid-js';
+import { State, root, effect } from 'solid-js';
 import { Component } from 'react';
 const RENDER_SYNC = Symbol('render sync');
 
@@ -34,7 +33,7 @@ export default function withSolid(mapState, mapSelectors) {
     class ReactSolidState extends ReactComponent {
       constructor(props) {
         super(props);
-        S.root(disposer => {
+        root(disposer => {
           this.state = new State(this.state || {})
           if (mapState) this.state.set(typeof mapState === 'function' ? mapState(state) : mapState);
           if (mapSelectors) this.state.select(typeof mapSelectors === 'function' ? mapSelectors(state): mapSelectors);
@@ -48,8 +47,8 @@ export default function withSolid(mapState, mapSelectors) {
           return super.render();
         }
         result = null;
-        S.root(disposer => {
-          this[RENDER_SYNC] = S.makeComputationNode(() => {
+        root(disposer => {
+          effect(() => {
             // first render
             if (!this[RENDER_SYNC]) {
               result = super.render();
@@ -57,7 +56,7 @@ export default function withSolid(mapState, mapSelectors) {
             }
             return super.forceUpdate();
           });
-          this[RENDER_SYNC].dispose = disposer;
+          this[RENDER_SYNC] = {dispose: disposer};
         })
         return result;
       }
