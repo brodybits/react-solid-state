@@ -1,102 +1,79 @@
-import { State, root, effect } from 'solid-js';
-import { Component } from 'react';
-const RENDER_SYNC = Symbol('render sync');
+import {
+  useState as sState,
+  useEffect as sEffect,
+  useMemo as sMemo,
+  useSignal as sSignal,
+  useCleanup as sCleanup,
+  root
+} from 'solid-js'
 
-function isStatelessComponent(Comp) {
-  return !(Comp.prototype && Comp.prototype.render) && !Component.isPrototypeOf(Comp);
-};
+import {
+  useMemo as rMemo,
+  useState as rState,
+  useEffect as rEffect
+} from "react";
 
-function toStatefulComponent(StatelessComponent) {
-  class StatefulComponent extends Component {
-    render() {
-      return StatelessComponent.call(this, { ...this.props, state: this.state }, this.context);
-    }
-  };
+export { reconcile } from 'solid-js';
 
-  StatefulComponent.displayName = StatelessComponent.displayName || StatelessComponent.name;
+let inSolidEffect = false;
+function trackNesting(args) {
+  const fn = args[0];
+  return [function() {
+    const outside = inSolidEffect;
+    inSolidEffect = true;
+    const ret = fn.call(this, arguments);
+    inSolidEffect = outside;
+    return ret;
+  }, ...args.slice(1)]
+}
 
-  StatefulComponent.propTypes = StatelessComponent.propTypes;
+function useForceUpdate() {
+  const [tick, setTick] = rState(1);
+  return () => setTick(tick + 1);
+}
 
-  StatefulComponent.defaultTypes = StatelessComponent.defaultTypes;
+export function useState(v) {
+  if (inSolidEffect) return sState(v);
+  const forceUpdate = useForceUpdate();
+  return rMemo(() => {
+    const [state, setState] = sState(v);
+    return [state, (...args) => (setState(...args), forceUpdate())]
+  }, []);
+}
 
-  StatefulComponent.contextTypes = StatelessComponent.contextTypes;
+export function useSignal(v) {
+  if (inSolidEffect) return sSignal(v);
+  const forceUpdate = useForceUpdate();
+  return rMemo(() => {
+    const [get, set] = sSignal(v);
+    return [get, v => (set(v), forceUpdate())]
+  }, []);
+}
 
-  return StatefulComponent;
-};
+export function useEffect(...args) {
+  if(inSolidEffect) return sEffect(...args);
+  return rEffect(() => {
+    let dispose;
+    root(disposer => {
+      dispose = disposer;
+      sEffect(...trackNesting(args));
+    })
+    return dispose;
+  }, []);
+}
 
-export default function withSolid(mapState, mapSelectors) {
-  return (ReactComponent) => {
-    if (isStatelessComponent(ReactComponent)) {
-      ReactComponent = toStatefulComponent(ReactComponent);
-    }
+export function useMemo(...args) {
+  if(inSolidEffect) return sMemo(...args);
+  let dispose;
+  rEffect(() => dispose, []);
+  return rMemo(() =>
+    root(disposer => {
+      dispose = disposer;
+      return sMemo(...trackNesting(args));
+    })
+  , []);
+}
 
-    class ReactSolidState extends ReactComponent {
-      constructor(props) {
-        super(props);
-        root(disposer => {
-          this.state = new State(this.state || {})
-          if (mapState) this.state.set(typeof mapState === 'function' ? mapState(state) : mapState);
-          if (mapSelectors) this.state.select(typeof mapSelectors === 'function' ? mapSelectors(state): mapSelectors);
-          this.state.dispose = disposer
-        })
-      }
-
-      render() {
-        var result;
-        if (this[RENDER_SYNC]) {
-          return super.render();
-        }
-        result = null;
-        root(disposer => {
-          effect(() => {
-            // first render
-            if (!this[RENDER_SYNC]) {
-              result = super.render();
-              return;
-            }
-            return super.forceUpdate();
-          });
-          this[RENDER_SYNC] = {dispose: disposer};
-        })
-        return result;
-      }
-
-      shouldComponentUpdate(next_props) {
-        var i, key, keys, len, next_keys;
-        keys = Object.keys(this.props);
-        next_keys = Object.keys(next_props);
-        if (keys.length !== next_keys.length) {
-          return true;
-        }
-        for (i = 0, len = keys.length; i < len; i++) {
-          key = keys[i];
-          if (this.props[key] !== next_props[key]) {
-            return true;
-          }
-        }
-        // prevent react state from rerender
-        return false;
-      }
-
-      componentWillUnmount() {
-        this.state.dispose();
-        this.state = null;
-        this[RENDER_SYNC].dispose();
-        this[RENDER_SYNC] = null;
-        if (super.componentWillUnmount) {
-          return super.componentWillUnmount(...arguments);
-        }
-      }
-    }
-
-    ReactSolidState.displayName = ReactComponent.displayName || ReactComponent.name;
-
-    ReactSolidState.propTypes = ReactComponent.propTypes;
-
-    ReactSolidState.defaultTypes = ReactComponent.defaultTypes;
-
-    ReactSolidState.contextTypes = ReactComponent.contextTypes;
-
-    return ReactSolidState;
-  };
-};
+export function useCleanup(fn) {
+  inSolidEffect ? sCleanup(fn) : rEffect(() => fn, []);
+}
