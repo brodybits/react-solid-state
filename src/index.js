@@ -4,13 +4,14 @@ import {
   useMemo as sMemo,
   useSignal as sSignal,
   useCleanup as sCleanup,
-  root
+  root, sample
 } from 'solid-js'
 
 import {
   useMemo as rMemo,
   useState as rState,
-  useEffect as rEffect
+  useEffect as rEffect,
+  memo
 } from "react";
 
 export { reconcile } from 'solid-js';
@@ -29,25 +30,48 @@ function trackNesting(args) {
 
 function useForceUpdate() {
   const [tick, setTick] = rState(1);
-  return () => setTick(tick + 1);
+  return () => Promise.resolve().then(() => setTick(tick + 1));
+}
+
+export function useObserver(fn) {
+  const forceUpdate = useForceUpdate();
+  let dispose;
+  rEffect(() => dispose, []);
+  const box = rMemo(() => {
+    const [tracking, track] = sSignal({}),
+      box = { track };
+    root(disposer => {
+      dispose = disposer;
+      sEffect(() => {
+        const v = tracking();
+        if (!('top' in v)) return;
+        else if (v.top) box.result = fn();
+        else forceUpdate();
+        v.top = false;
+      })
+    })
+    return box;
+  }, []);
+  box.track({top: true})
+  return box.result
+}
+
+export function withSolid(ComponentType) {
+  const box = {}
+  return memo((p, r) => {
+    Object.assign(box, {p, r});
+    return useObserver(() => ComponentType(box.p, box.r))
+  });
 }
 
 export function useState(v) {
   if (inSolidEffect) return sState(v);
-  const forceUpdate = useForceUpdate();
-  return rMemo(() => {
-    const [state, setState] = sState(v);
-    return [state, (...args) => (setState(...args), forceUpdate())]
-  }, []);
+  return rMemo(() => sState(v), []);
 }
 
 export function useSignal(v) {
   if (inSolidEffect) return sSignal(v);
-  const forceUpdate = useForceUpdate();
-  return rMemo(() => {
-    const [get, set] = sSignal(v);
-    return [get, v => (set(v), forceUpdate())]
-  }, []);
+  return rMemo(() => sSignal(v), []);
 }
 
 export function useEffect(...args) {

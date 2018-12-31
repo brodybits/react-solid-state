@@ -8,13 +8,13 @@ The goal here is to give as close as possible to Solid's easy state management a
 
 There are a few differences in the API from some same named Hooks from React. Solid State are objects much like traditional React State. There is a useCleanup method that lets you register release code at both the component unmount level and in each Hook. useEffect doesn't expect a cleanup/dispose method returned for that reason. useMemo (and useSignal) return getters rather than the the pure value. This is because the context under data is accessed is the key to automatic dependency tracking. For all the information of how Solid works look at the [Documentation](https://github.com/ryansolid/solid).
 
-To get started simply import in the methods. Unlike MobX you don't need to wrap things in Observers. Hooks manage retriggering rendering themselves so in cases it's a good idea to memo your Component to prevent unnecessary rerenders from React.
+To get started simply wrap your components withSolid HOC. From there use your hooks.
 
 ```jsx
-import { useState } from 'react-solid-state'
+import { withSolid, useState } from 'react-solid-state'
 import React from 'react'
 
-const WelcomeComponent = React.memo(props => {
+const WelcomeComponent = withSolid(props => {
   const [state, setState] = useState({ recipient: 'John' });
   return <div onClick={() => setState({ recipient: 'Jake' })}>
     Hello { this.state.recipient }
@@ -23,10 +23,10 @@ const WelcomeComponent = React.memo(props => {
 ```
 
 ```jsx
-import { useState, useEffect, useCleanup } from 'react-solid-state'
+import { withSolid, useState, useEffect, useCleanup } from 'react-solid-state'
 import React from 'react'
 
-const CounterComponent = React.memo(props => {
+const CounterComponent = withSolid(props => {
   const [state, setState] = useState({ count: 0 });
   useEffect(() => {
     const timer = setInterval(() => setState('count', c => c + 1), 1000);
