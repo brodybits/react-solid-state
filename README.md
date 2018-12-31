@@ -12,9 +12,9 @@ To get started simply import in the methods. Unlike MobX you don't need to wrap 
 
 ```jsx
 import { useState } from 'react-solid-state'
-import React, { memo } from 'react'
+import React from 'react'
 
-const WelcomeComponent = memo(props => {
+const WelcomeComponent = React.memo(props => {
   const [state, setState] = useState({ recipient: 'John' });
   return <div onClick={() => setState({ recipient: 'Jake' })}>
     Hello { this.state.recipient }
@@ -24,9 +24,9 @@ const WelcomeComponent = memo(props => {
 
 ```jsx
 import { useState, useEffect, useCleanup } from 'react-solid-state'
-import React, { memo } from 'react'
+import React from 'react'
 
-const CounterComponent = memo(props => {
+const CounterComponent = React.memo(props => {
   const [state, setState] = useState({ count: 0 });
   useEffect(() => {
     const timer = setInterval(() => setState('count', c => c + 1), 1000);
