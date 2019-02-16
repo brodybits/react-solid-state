@@ -1,10 +1,10 @@
 import {
-  useState as sState,
-  useEffect as sEffect,
-  useMemo as sMemo,
-  useSignal as sSignal,
-  useCleanup as sCleanup,
-  root, sample
+  createState as sState,
+  createEffect as sEffect,
+  createMemo as sMemo,
+  createSignal as sSignal,
+  onCleanup as sCleanup,
+  createRoot, sample
 } from 'solid-js'
 
 import {
@@ -40,7 +40,7 @@ export function useObserver(fn) {
   const box = rMemo(() => {
     const [tracking, track] = sSignal({}),
       box = { track };
-    root(disposer => {
+    createRoot(disposer => {
       dispose = disposer;
       sEffect(() => {
         const v = tracking();
@@ -78,7 +78,7 @@ export function useEffect(...args) {
   if(inSolidEffect) return sEffect(...args);
   return rEffect(() => {
     let dispose;
-    root(disposer => {
+    createRoot(disposer => {
       dispose = disposer;
       sEffect(...trackNesting(args));
     })
@@ -91,7 +91,7 @@ export function useMemo(...args) {
   let dispose;
   rEffect(() => dispose, []);
   return rMemo(() =>
-    root(disposer => {
+    createRoot(disposer => {
       dispose = disposer;
       return sMemo(...trackNesting(args));
     })

@@ -1,7 +1,7 @@
 {
   "name": "react-solid-state",
   "description": "Superior State management for modern React",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Ryan Carniato",
   "license": "MIT",
   "repository": {
@@ -14,16 +14,16 @@
     "prepublishOnly": "rollup -c"
   },
   "peerDependencies": {
-    "solid-js": "~0.3.2",
-    "react": "16.7.0-alpha.2",
-    "react-dom": "16.7.0-alpha.2"
+    "solid-js": "~0.4.0",
+    "react": "^16.8.2",
+    "react-dom": "^16.8.2"
   },
   "devDependencies": {
     "rollup": "^1.0.0",
     "rollup-plugin-node-resolve": "^4.0.0",
-    "react": "16.7.0-alpha.2",
-    "react-dom": "16.7.0-alpha.2",
-    "solid-js": "~0.3.2",
+    "react": "16.8.2",
+    "react-dom": "16.8.2",
+    "solid-js": "~0.4.0",
     "s-js": "~0.4.9"
   }
 }
