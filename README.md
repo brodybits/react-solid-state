@@ -17,7 +17,7 @@ import React from 'react'
 const WelcomeComponent = withSolid(props => {
   const [state, setState] = useState({ recipient: 'John' });
   return <div onClick={() => setState({ recipient: 'Jake' })}>
-    Hello { this.state.recipient }
+    Hello { state.recipient }
   </div>
 })
 ```
